@@ -1,5 +1,6 @@
 import { createContext, useState } from "react"
 import { getContacts } from "../services/contactsService"
+import replies from "../data/contactReplies"
 
 export const ContactsContext = createContext({
     contacts: [],
@@ -10,14 +11,16 @@ export const ContactsContext = createContext({
 const ContactsContextProvider = ({ children }) => {
     const [contacts, setContacts] = useState(getContacts())
 
+    const getTime = () => new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
+
     // Agrega un mensaje a la conversación de un contacto
     const addMessage = (contactId, text) => {
-        const time = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
+        const time = getTime()
         setContacts(prev =>
             prev.map(contact => {
                 if (Number(contact.id) !== Number(contactId)) return contact
                 const newMessage = {
-                    id: contact.messages.length + 1,
+                    id: Date.now(),
                     text,
                     send_by_me: true,
                     time,
@@ -26,6 +29,27 @@ const ContactsContextProvider = ({ children }) => {
                 return { ...contact, messages: [...contact.messages, newMessage] }
             })
         )
+
+        // Respuesta automática del contacto
+        const contactReplies = replies[Number(contactId)]
+        if (contactReplies) {
+            const randomReply = contactReplies[Math.floor(Math.random() * contactReplies.length)]
+            setTimeout(() => {
+                setContacts(prev =>
+                    prev.map(contact => {
+                        if (Number(contact.id) !== Number(contactId)) return contact
+                        const replyMessage = {
+                            id: Date.now() + 1,
+                            text: randomReply,
+                            send_by_me: false,
+                            time: getTime(),
+                            is_read: false
+                        }
+                        return { ...contact, messages: [...contact.messages, replyMessage] }
+                    })
+                )
+            }, 1500)
+        }
     }
 
     // Agrega un nuevo contacto
