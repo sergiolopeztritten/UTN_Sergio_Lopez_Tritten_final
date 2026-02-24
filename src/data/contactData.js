@@ -21,7 +21,7 @@ const contacts = [
     },
     {
         id: 4,
-        name: 'Yoda (Star Wars)',
+        name: 'Yoda',
         last_time_connection: 'Hace 900 años',
         profile_picture: '/yoda.jpg', 
         messages: [
